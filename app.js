@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 
+const itemRoutes = require("./routes/items.js");
+
 const app = express();
 
 app.use(cors());
@@ -11,12 +13,10 @@ app.use(
   })
 );
 
-app.use("/", (req, res) => {
+app.get("/", (req, res) => {
   res.status(200).send("Instructions and form.");
 });
 
-app.use("/items", (req, res) => {
-  res.status(200).send("Item routes");
-});
+app.use("/items", itemRoutes);
 
 module.exports = app;

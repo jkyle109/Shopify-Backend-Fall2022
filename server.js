@@ -1,5 +1,5 @@
 const app = require("./app.js");
-require("./mongoose.js");
+const db = require("./mongoose.js");
 require("dotenv").config();
 
 app.listen(process.env.PORT, () => {
