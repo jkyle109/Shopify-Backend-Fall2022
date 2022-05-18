@@ -2,7 +2,6 @@ const request = require("supertest");
 const mockingoose = require("mockingoose");
 const app = require("../app.js");
 const Items = require("../models/itemModel.js");
-const { status } = require("express/lib/response");
 const { ObjectId } = require("mongoose").Types;
 
 describe("Get /items", () => {
@@ -21,7 +20,7 @@ describe("Get /items", () => {
     expect(res.statusCode).toBe(404);
   });
   test("should return 400 if error", async () => {
-    const doc = new Error();
+    const doc = Error();
     mockingoose(Items).toReturn(doc, "find");
     const res = await request(app).get("/items");
     expect(res.statusCode).toBe(400);
@@ -31,7 +30,7 @@ describe("Get /items", () => {
 describe("Get /items/:id", () => {
   test("should return 200 if valid id", async () => {
     const doc = {
-      _id: new ObjectId(),
+      _id: ObjectId(),
       name: "Item1",
       amount: 1,
       lastUpdated: Date.now,
@@ -63,7 +62,7 @@ describe("Get /items/:id", () => {
     expect(res.statusCode).toBe(404);
   });
   test("should return 400 if not 12-bit hex", async () => {
-    const doc = new Error();
+    const doc = Error();
     mockingoose(Items).toReturn(doc, "findOne");
     const res = await request(app).get(`/items/${ObjectId()}`);
     expect(res.statusCode).toBe(400);
@@ -81,78 +80,26 @@ describe("Get /items/deleted", () => {
   });
 });
 
-// beforeEach(() => {
-//   mockingoose.resetAll();
-// });
+describe("Post /items", () => {
+  test("should return 201 when added.", async () => {
+    const doc = {
+      name: "Item1",
+    };
+    const res = await request(app).post("/items").send(doc);
+    expect(res.statusCode).toBe(201);
+    expect(res.body.name).toBe(doc.name);
+  });
+});
 
-// describe("Get /items", () => {
-//   test("when no items should return empty list.", async () => {
-//     const doc = [];
-//     mockingoose(Items).toReturn(doc, "find");
-//     const res = await request(app).get("/items");
-//     expect(res.statusCode).toBe(200);
-//     expect(res.body).toStrictEqual([]);
-//   });
-
-//   test("when there are items, return all items.", async () => {
-//     const doc = [
-//       {
-//         _id: new ObjectId(),
-//         name: "Item1",
-//         amount: 1,
-//         lastUpdated: Date.now,
-//         deleted: false,
-//       },
-//       {
-//         _id: new ObjectId(),
-//         name: "Item2",
-//         amount: 2,
-//         lastUpdated: Date.now,
-//         deleted: false,
-//       },
-//       {
-//         _id: new ObjectId(),
-//         name: "Item3",
-//         amount: 3,
-//         lastUpdated: Date.now,
-//         deleted: false,
-//       },
-//     ];
-//     mockingoose(Items).toReturn(doc, "find");
-//     const res = await request(app).get("/items");
-//     console.log(res.body);
-//     expect(res.body.length).toBe(3);
-//   });
-//   test("when there are deleted items, return all deleted items.", async () => {
-//     const doc = [
-//       {
-//         _id: new ObjectId(),
-//         name: "Item4",
-//         amount: 4,
-//         lastUpdated: Date.now,
-//         deleted: true,
-//         deleteComment: "4",
-//       },
-//       {
-//         _id: new ObjectId(),
-//         name: "Item5",
-//         amount: 5,
-//         lastUpdated: Date.now,
-//         deleted: true,
-//         deleteComment: "5",
-//       },
-//       {
-//         _id: new ObjectId(),
-//         name: "Item6",
-//         amount: 6,
-//         lastUpdated: Date.now,
-//         deleted: true,
-//         deleteComment: "6",
-//       },
-//     ];
-//     mockingoose(Items).toReturn(doc, "find");
-//     const res = await request(app).get("/items");
-//     console.log(res.body);
-//     expect(res.body.length).toBe(3);
-//   });
-// });
+describe("PUT /:id", () => {
+  test("should return 200 when updated.", async () => {
+    const doc1 = { _id: ObjectId(), name: "Item1" };
+    const doc2 = { _id: ObjectId(), name: "Item2" };
+    mockingoose(Items).toReturn(doc1, "findOne");
+    const res = await request(app).put(`/items/${doc1._id}`).send(doc2);
+    expect(res.statusCode).toBe(200);
+    expect(JSON.stringify(res.body._id)).toStrictEqual(
+      JSON.stringify(doc2._id)
+    );
+  });
+});
