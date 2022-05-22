@@ -93,14 +93,16 @@ describe("POST /items", () => {
 
 describe("PATCH /items/:id", () => {
   test("should return 200 when updated.", async () => {
-    const doc1 = { _id: new bson.ObjectId(), name: "Item1" };
-    const doc2 = { _id: new bson.ObjectId(), name: "Item2" };
-    mockingoose(Items).toReturn(doc1, "findOne");
-    const res = await request(app).patch(`/items/${doc1._id}`).send(doc2);
+    const _id = new bson.ObjectId();
+    const update = { name: "Item2" };
+    const after = { _id, name: "Item2" };
+    mockingoose(Items).toReturn(after, "findOneAndUpdate");
+    const res = await request(app).patch(`/items/${_id}`).send(update);
     expect(res.statusCode).toBe(200);
     expect(JSON.stringify(res.body._id)).toStrictEqual(
-      JSON.stringify(doc2._id)
+      JSON.stringify(after._id)
     );
+    expect(res.body.name).toBe(after.name);
   });
 });
 
@@ -133,7 +135,6 @@ describe("DELETE /items/:id", () => {
       .delete(`/items/${doc._id}`)
       .send(doc)
       .catch((err) => console.log(err));
-    console.log(res.body, doc._id);
     expect(res.statusCode).toBe(200);
     expect(JSON.stringify(res.body._id)).toStrictEqual(JSON.stringify(doc._id));
   });
