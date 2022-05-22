@@ -1,23 +1,23 @@
 const mongoose = require("mongoose");
 const db = require("../mongoose.js");
 const { ObjectId } = require("mongoose").Types;
-const d = new Date();
+const bson = require("bson");
 const ItemSchema = new mongoose.Schema({
-  _id: { type: ObjectId, required: true, default: ObjectId() },
-  name: { type: String, required: true },
-  amount: { type: Number, required: true, default: 0 },
+  _id: { type: ObjectId, required: true, default: new bson.ObjectId() },
+  name: { type: String, required: false },
+  amount: { type: Number, required: false, default: 0 },
   price: { type: Number, required: false, default: 0.0 },
   description: { type: String, required: false, default: "N/A" },
-  lastUpdated: { type: Date, required: true, default: Date.now },
-  deleted: { type: Boolean, required: true, default: false },
+  lastUpdated: { type: Date, required: false, default: Date.now() },
+  deleted: { type: Boolean, required: false, default: false },
   deleteComment: { type: String, required: false },
 });
 
 // Add TTL to each item if they have been deleted.
 ItemSchema.index(
-  { expireAt: 1 },
+  { lastUpdated: 1 },
   {
-    expireAfterSeconds: 24 * 60 * 60, // 1 day
+    expireAfterSeconds: 86400, // 1 day
     partialFilterExpression: { deleted: true },
   }
 );
