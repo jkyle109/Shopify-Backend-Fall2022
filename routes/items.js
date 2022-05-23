@@ -52,6 +52,7 @@ router.post("/", async (req, res) => {
 });
 
 // Edit
+// Patch
 router.patch("/:id", async (req, res) => {
   const id = req.params.id;
   const data = req.body;
@@ -63,11 +64,34 @@ router.patch("/:id", async (req, res) => {
   if (data._id || data.lastUpdated)
     return res
       .status(400)
-      .send(errJson("Cannot edit id or last updated field"));
+      .send(errJson("Cannot manually edit id or last updated field"));
 
-  const item = new Items(data);
-  // Unset default generated ObjectID
-  item._id = undefined;
+  data.lastUpdated = Date.now();
+
+  const result = await Items.findByIdAndUpdate(id, data, { new: true }).catch(
+    errLogger
+  );
+  if (result instanceof Error) return res.status(400).send(errJson(result));
+  if (!result) return res.status(404).send(errJson(`Id ${id} not found.`));
+  return res.status(200).send(result);
+});
+
+// Put
+router.put("/:id", async (req, res) => {
+  const id = req.params.id;
+  const data = req.body;
+  // Check if valid ObjectId
+  if (!ObjectId.isValid(id))
+    return res.status(404).send(errJson("Invalid item id type."));
+
+  // Should not be able to edit these fields
+  if (data._id || data.lastUpdated)
+    return res
+      .status(400)
+      .send(errJson("Cannot manually edit id or last updated field"));
+
+  const item = new Items(data, null, { skipId: true });
+  item.lastUpdated = Date.now();
 
   const result = await Items.findByIdAndUpdate(id, item, { new: true }).catch(
     errLogger
