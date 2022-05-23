@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const { marked } = require("marked");
+const fs = require("fs");
 
 const itemRoutes = require("./routes/items.js");
 
@@ -14,7 +16,10 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  res.status(200).send("Instructions and form.");
+  const md = fs.readFileSync(__dirname + "/README.md", "utf8");
+  const html = marked.parse(md);
+
+  res.status(200).send(html);
 });
 
 app.use("/items", itemRoutes);
