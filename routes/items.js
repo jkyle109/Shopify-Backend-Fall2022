@@ -34,8 +34,27 @@ router.delete("/:id", async (req, res) => {
 });
 
 // Restore
-router.patch("restore/:id", async (req, res) => {
-  res.status(200).send("Restore a deleted item.");
+router.patch("/restore/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    // Check if valid ObjectId
+    if (!ObjectId.isValid(id))
+      return res.status(404).send(errJson("Invalid item id type."));
+
+    const item = await Items.findById(id).catch(errLogger);
+    if (item instanceof Error) return res.status(400).send(errJson(item));
+    if (!item) return res.status(404).send(errJson(`Id ${id} not found.`));
+
+    item.deleted = false;
+    item.deleteComment = undefined;
+    item.lastUpdated = Date.now();
+
+    const result = await item.save();
+    return res.status(200).send(result);
+  } catch (err) {
+    return res.status(400).send(errJson(err));
+  }
 });
 
 // Create
