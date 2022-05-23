@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/jkyle109/Shopify-Backend-Fall2022#readme",
   "dependencies": {
+    "bson": "^4.6.4",
     "bson-objectid": "^2.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
